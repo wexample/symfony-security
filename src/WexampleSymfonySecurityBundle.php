@@ -2,8 +2,8 @@
 
 namespace Wexample\SymfonySecurity;
 
-use Wexample\SymfonyHelpers\Class\AbstractBundle;
+use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class WexampleSymfonySecurityBundle extends AbstractBundle
+class WexampleSymfonySecurityBundle extends Bundle
 {
 }

@@ -2,14 +2,16 @@
 
 namespace Wexample\SymfonySecurity\DependencyInjection;
 
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
-use Wexample\SymfonyHelpers\DependencyInjection\AbstractWexampleSymfonyExtension;
+use Symfony\Component\DependencyInjection\Extension\Extension;
+use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Wexample\SymfonySecurity\Interface\LogMaskerInterface;
 use Wexample\SymfonySecurity\Log\Masker\PatternLogMasker;
 use Wexample\SymfonySecurity\Log\Masker\QueryParameterLogMasker;
 
-class WexampleSymfonySecurityExtension extends AbstractWexampleSymfonyExtension
+class WexampleSymfonySecurityExtension extends Extension
 {
     public function load(
         array $configs,
@@ -33,9 +35,6 @@ class WexampleSymfonySecurityExtension extends AbstractWexampleSymfonyExtension
             }
         }
 
-        $this->loadConfig(
-            __DIR__,
-            $container
-        );
+        (new YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config')))->load('services.yaml');
     }
 }
