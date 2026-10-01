@@ -1,0 +1,7 @@
+domain: symfony-security.wex
+global:
+  name: symfony-security
+  type: php-package
+  version: 1.0.0
+wex:
+  version: 6.0.137
