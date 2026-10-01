@@ -1,5 +1,6 @@
 {
   "name": "wexample/symfony-security",
+  "description": "Security contracts shared by the Symfony packages: secret redaction in logs, security events",
   "version": "1.0.0",
   "type": "library",
   "license": "MIT",
@@ -7,5 +8,29 @@
     "psr-4": {
       "Wexample\\SymfonySecurity\\": "src/"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Wexample\\SymfonySecurity\\Tests\\": "tests/"
+    }
+  },
+  "authors": [
+    {
+      "name": "weeger",
+      "email": "romain.weeger@wexample.com"
+    }
+  ],
+  "require": {
+    "php": ">=8.5",
+    "psr/log": "^3.0",
+    "symfony/event-dispatcher": "^7.4 || ^8.0",
+    "symfony/http-foundation": "^7.4 || ^8.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "*",
+    "monolog/monolog": "^3.5"
+  },
+  "suggest": {
+    "monolog/monolog": "Required by AbstractSecretRedactionProcessor, which masks secrets in every log record"
   }
 }

@@ -1,0 +1,7 @@
+## Installation
+
+```bash
+composer require wexample/symfony-security
+```
+
+Nothing to register nor configure: the package ships abstract classes and a helper, no bundle. `monolog/monolog` (3.5 or later) is needed for the redaction processor and the log subscriber's channel attribute; `symfony/monolog-bundle` registers them through `#[AsMonologProcessor]` and `#[WithMonologChannel]`.
