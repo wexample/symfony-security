@@ -9,12 +9,15 @@ use JsonSerializable;
 use Monolog\LogRecord;
 use ReflectionProperty;
 use Stringable;
+use Symfony\Component\DependencyInjection\Attribute\AutowireIterator;
 use Throwable;
+use Wexample\SymfonySecurity\Interface\LogMaskerInterface;
 
 /**
- * Walks everything a formatter reads of a log record — message, context,
- * extra, array keys included — and hands each string to mask(): a package
- * only says what its secret looks like.
+ * Walks, once, everything a formatter reads of a log record — message,
+ * context, extra, array keys included — and hands each string to every
+ * masker: the packages and the application only say what their secrets look
+ * like.
  *
  * An exception carried by a record is rewritten in place, with its previous
  * ones: the formatter reads its message after this processor, and a 404
@@ -22,17 +25,19 @@ use Throwable;
  * it — jsonSerialize(), __toString(), public properties — and replaced by
  * that masked reading, only when it held a secret.
  *
- * A subclass is registered with #[AsMonologProcessor], so that it runs on
- * every channel.
+ * Registered on every channel, after the other processors of the logger, so
+ * that what they add is walked too.
  */
-abstract class AbstractSecretRedactionProcessor
+class SecretRedactionProcessor
 {
-    public const string REDACTED = '[redacted]';
-
     /**
-     * Returns the string with every secret it holds masked.
+     * @param iterable<LogMaskerInterface> $maskers
      */
-    abstract protected function mask(string $value): string;
+    public function __construct(
+        #[AutowireIterator(LogMaskerInterface::TAG)]
+        private readonly iterable $maskers,
+    ) {
+    }
 
     public function __invoke(LogRecord $record): LogRecord
     {
@@ -43,18 +48,13 @@ abstract class AbstractSecretRedactionProcessor
         );
     }
 
-    /**
-     * Masks the value of the given query parameters in every URL of the string.
-     *
-     * @param list<string> $names
-     */
-    protected function maskQueryParameters(string $value, array $names): string
+    private function mask(string $value): string
     {
-        return preg_replace(
-            '/([?&](?:' . implode('|', array_map(static fn (string $name) => preg_quote($name, '/'), $names)) . ')=)[^&\s"\'#]+/',
-            '$1' . static::REDACTED,
-            $value
-        );
+        foreach ($this->maskers as $masker) {
+            $value = $masker->mask($value);
+        }
+
+        return $value;
     }
 
     private function redact(mixed $value): mixed

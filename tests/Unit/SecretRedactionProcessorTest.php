@@ -13,8 +13,10 @@ use Monolog\LogRecord;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use stdClass;
-use Wexample\SymfonySecurity\Tests\Fixtures\Log\ApiKeyRedactionProcessor;
-use Wexample\SymfonySecurity\Tests\Fixtures\Log\QueryTokenRedactionProcessor;
+use Wexample\SymfonySecurity\Log\Masker\PatternLogMasker;
+use Wexample\SymfonySecurity\Log\Masker\QueryParameterLogMasker;
+use Wexample\SymfonySecurity\Log\SecretRedactionProcessor;
+use Wexample\SymfonySecurity\Tests\Fixtures\Log\CountingLogMasker;
 
 /**
  * Every place a formatter reads, checked on what the formatters actually
@@ -35,10 +37,22 @@ class SecretRedactionProcessorTest extends TestCase
     protected function setUp(): void
     {
         $this->handler = new TestHandler();
-        // One processor of a package, one of an application.
+        // One masker of a package, one of an application.
         $this->logger = new Logger('app', [$this->handler], [
-            new QueryTokenRedactionProcessor(),
-            new ApiKeyRedactionProcessor(),
+            new SecretRedactionProcessor([
+                new QueryParameterLogMasker(['token', 'sig']),
+                new class () extends PatternLogMasker {
+                    public function __construct()
+                    {
+                        parent::__construct([]);
+                    }
+
+                    public function mask(string $value): string
+                    {
+                        return preg_replace('/key_([0-9a-z]{4})[0-9a-z]{12}/', 'key_$1…', $value);
+                    }
+                },
+            ]),
         ]);
     }
 
@@ -131,6 +145,25 @@ class SecretRedactionProcessorTest extends TestCase
         $this->logger->info('Object', ['object' => $object]);
 
         $this->assertNoSecret();
+    }
+
+    public function testTheRecordIsWalkedOnceWhateverTheNumberOfMaskers(): void
+    {
+        $maskers = [new CountingLogMasker(), new CountingLogMasker(), new CountingLogMasker()];
+        $processor = new SecretRedactionProcessor($maskers);
+        $logger = new Logger('app', [new TestHandler()], [$processor]);
+
+        // The message, two keys, a value, an exception and its previous one: 6 strings.
+        $logger->info('Message', ['key' => 'value', 'exception' => new RuntimeException('Outer', 0, new RuntimeException('Inner'))]);
+
+        $this->assertSame([6, 6, 6], array_map(static fn (CountingLogMasker $masker) => $masker->calls, $maskers));
+    }
+
+    public function testPatternsMaskTheirWholeMatch(): void
+    {
+        $masker = new PatternLogMasker(['/(?<=Bearer )\S+/', '/pk_[0-9a-f]{8}/']);
+
+        $this->assertSame('Bearer [redacted] and [redacted].', $masker->mask('Bearer abc.def and pk_0123abcd.'));
     }
 
     private function assertNoSecret(): void

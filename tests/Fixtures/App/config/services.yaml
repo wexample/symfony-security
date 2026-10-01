@@ -1,0 +1,23 @@
+framework:
+  test: true
+  secret: test
+
+monolog:
+  channels: [audit]
+  handlers:
+    test:
+      type: test
+      level: debug
+
+wexample_symfony_security:
+  redaction:
+    query_parameters: [sig]
+    patterns: ['/(?<=Bearer )\S+/']
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  Wexample\SymfonySecurity\Tests\Fixtures\App\Log\:
+    resource: '../Log/'

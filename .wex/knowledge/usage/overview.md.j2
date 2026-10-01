@@ -1,34 +1,39 @@
 ## Masking a secret in every log
 
-Extend `AbstractSecretRedactionProcessor`, say what to mask, and register it on every channel with `#[AsMonologProcessor]` (autoconfiguration does it for a class under the application's `src/`):
+One processor, `SecretRedactionProcessor`, is registered on every channel, last of the logger's processors (`priority: -1024`), so what the others add — a URL in `extra` — is walked too. It walks each record once and hands every string to every masker, in the order of their tag priority.
+
+A masker says what one kind of secret looks like. Three ways to declare one:
+
+- in the configuration, for a query parameter or a pattern: see `readme/installation`;
+- as a service of `QueryParameterLogMasker` or `PatternLogMasker`, from a package's `services.yaml` — `symfony-user` masks its link signatures this way:
+
+```yaml
+wexample_symfony_user.log_masker.link_signature:
+    class: Wexample\SymfonySecurity\Log\Masker\QueryParameterLogMasker
+    arguments: [['hash']]
+```
+
+- as a class implementing `LogMaskerInterface`, when the secret needs code — `symfony-api`'s `MachineTokenLogMasker` replaces a token by its hint. Autoconfiguration tags it:
 
 ```php
-use Monolog\Attribute\AsMonologProcessor;
-use Wexample\SymfonySecurity\Log\AbstractSecretRedactionProcessor;
+use Wexample\SymfonySecurity\Interface\LogMaskerInterface;
 
-#[AsMonologProcessor]
-class PartnerKeyRedactionProcessor extends AbstractSecretRedactionProcessor
+class PartnerKeyLogMasker implements LogMaskerInterface
 {
-    protected function mask(string $value): string
+    public function mask(string $value): string
     {
-        // A query parameter of a URL…
-        $value = $this->maskQueryParameters($value, ['partner_key']);
-
-        // …or any pattern, replaced by REDACTED or by a hint.
-        return preg_replace('/pk_[0-9a-f]{32}/', self::REDACTED, $value);
+        return preg_replace('/pk_([0-9a-f]{4})[0-9a-f]{28}/', 'pk_$1…', $value);
     }
 }
 ```
 
-The parent walks everything a formatter reads, so `mask()` only ever sees strings:
+What the processor walks, so that a masker only ever sees strings:
 
 - the message, the context, the extra, nested arrays and their string keys;
 - an exception carried anywhere in the record, and its previous ones: their message is rewritten in place, since the formatter reads it after the processors — and so does any handler holding the object;
 - any other object, read as Monolog's formatter reads it — `jsonSerialize()`, else `__toString()`, else its public properties —, replaced by `[Class => masked reading]` when it held a secret, left untouched otherwise. Dates are left alone.
 
-Each processor walks the record on its own; `symfony-user` masks its link signatures, `symfony-api` its machine tokens, the application its own secrets.
-
-Not covered: a processor registered on a single handler runs after the logger's processors, so what it adds is not walked; a formatter reading something else than the record (a stack trace's arguments, if a custom formatter prints them).
+Not covered: a processor registered on a single handler runs after the logger's processors, so what it adds is not walked; a formatter reading something else than the record.
 
 ## Recording security facts
 
@@ -64,7 +69,7 @@ class BillingSecurityLogSubscriber extends AbstractSecurityEventLogSubscriber
 }
 ```
 
-The event is dispatched under its own class name, so existing listeners keep their event; a recorder of every security fact — an audit package — listens to each class and reads them through `AbstractSecurityEvent::toArray()`:
+The subscriber stays one small class per package: the `#[WithMonologChannel]` attribute is what creates the channel and hands it the right logger, and the event is dispatched under its own class name, so existing listeners keep their event. A recorder of every security fact — an audit package — listens to each class and reads them through `AbstractSecurityEvent::toArray()`:
 
 ```
 type, outcome (success|failure), cause, user_id, method, firewall, ip, user_agent, request_id, occurred_at (UTC, ATOM), extra

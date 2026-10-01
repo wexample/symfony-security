@@ -1,0 +1,10 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Wexample\SymfonySecurity\Log\SecretRedactionProcessor:
+        tags:
+            # Last of the logger's processors: what the others add is walked too.
+            - { name: monolog.processor, priority: -1024 }

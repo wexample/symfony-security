@@ -23,14 +23,35 @@
   "require": {
     "php": ">=8.5",
     "psr/log": "^3.0",
+    "monolog/monolog": "^3.5",
+    "wexample/symfony-helpers": ">=12.0.0",
+    "symfony/config": "^7.4 || ^8.0",
+    "symfony/dependency-injection": "^7.4 || ^8.0",
     "symfony/event-dispatcher": "^7.4 || ^8.0",
-    "symfony/http-foundation": "^7.4 || ^8.0"
+    "symfony/http-foundation": "^7.4 || ^8.0",
+    "symfony/http-kernel": "^7.4 || ^8.0",
+    "symfony/yaml": "^7.4 || ^8.0"
   },
   "require-dev": {
     "phpunit/phpunit": "*",
-    "monolog/monolog": "^3.5"
+    "symfony/framework-bundle": "^7.4 || ^8.0",
+    "symfony/monolog-bundle": "^3.10"
   },
   "suggest": {
-    "monolog/monolog": "Required by AbstractSecretRedactionProcessor, which masks secrets in every log record"
+    "symfony/monolog-bundle": "Registers the redaction processor on every channel, and the security journals' channels"
+  },
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../*",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "extra": {
+    "install": {
+      "bundle_env": "all"
+    }
   }
 }
