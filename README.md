@@ -1,6 +1,6 @@
 # symfony-security
 
-Version: 1.0.1
+Version: 2.0.0
 
 ## Masking a secret in every log
 
@@ -112,7 +112,6 @@ Visit the [Wexample Suite documentation](https://docs.wexample.com) for the comp
 - php: >=8.5
 - psr/log: ^3.0
 - monolog/monolog: ^3.5
-- wexample/symfony-helpers: >=12.0.0
 - symfony/config: ^7.4 || ^8.0
 - symfony/dependency-injection: ^7.4 || ^8.0
 - symfony/event-dispatcher: ^7.4 || ^8.0
