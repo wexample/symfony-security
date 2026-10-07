@@ -859,6 +859,13 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         query_parameters?: list<scalar|Param|null>,
  *         patterns?: list<scalar|Param|null>,
  *     },
+ *     headers?: array{ // Security headers added to every main response that does not set them already; null leaves one out.
+ *         strict_transport_security?: scalar|Param|null, // Sent over HTTPS only. Once a browser has read it, it refuses plain HTTP on the host for max-age seconds. // Default: "max-age=31536000; includeSubDomains"
+ *         content_type_options?: scalar|Param|null, // Default: "nosniff"
+ *         frame_options?: scalar|Param|null, // Who may show the pages in a frame. DENY when no page of the application is ever framed. // Default: "SAMEORIGIN"
+ *         referrer_policy?: scalar|Param|null, // Default: "strict-origin-when-cross-origin"
+ *         content_security_policy?: scalar|Param|null, // Off by default: a policy is written against the scripts and styles of the application, not guessed. // Default: null
+ *     },
  * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,

@@ -85,11 +85,27 @@ The subscriber writes `type` as the message and that array as the context, at `w
 
 `RequestIdHelper::resolve($requestStack->getMainRequest())` returns the `X-Request-Id` header given by a proxy, or an id of 16 hex characters generated once per request, and the same to every package asking during that request — the security journals of `symfony-user` and `symfony-api`, the batch log of `symfony-api`. A header holding anything but visible ASCII, or longer than 128 characters, is replaced by a generated id: it comes from the client and lands in every security record. `null` outside a request.
 
+## Security headers on every response
+
+`SecurityHeadersSubscriber` adds these headers to every main response, error pages included:
+
+```
+Strict-Transport-Security: max-age=31536000; includeSubDomains   (over HTTPS only)
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+Referrer-Policy: strict-origin-when-cross-origin
+```
+
+A header the response already carries is kept: a page that must be framed elsewhere sets its own `X-Frame-Options` on its response. `Content-Security-Policy` is off until the application writes one — a policy depends on its own scripts and styles. Each value is changed or left out in the configuration: see `readme/installation`.
+
+Before switching an existing host to HTTPS only, remember that a browser keeps `Strict-Transport-Security` for `max-age` seconds after reading it, subdomains included: shorten it, or drop `includeSubDomains`, while a subdomain still serves plain HTTP.
+
 ## Table of Contents
 
 - [Masking a secret in every log](#masking-a-secret-in-every-log)
 - [Recording security facts](#recording-security-facts)
 - [The request id](#the-request-id)
+- [Security headers on every response](#security-headers-on-every-response)
 - [Integration in the Suite](#integration-in-the-suite)
 - [Dependencies](#dependencies)
 - [Versioning & Compatibility Policy](#versioning--compatibility-policy)

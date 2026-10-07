@@ -13,6 +13,9 @@ wexample_symfony_security:
   redaction:
     query_parameters: [sig]
     patterns: ['/(?<=Bearer )\S+/']
+  headers:
+    frame_options: DENY
+    referrer_policy: ~
 
 services:
   _defaults:
