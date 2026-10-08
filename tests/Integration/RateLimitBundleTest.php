@@ -40,7 +40,12 @@ class RateLimitBundleTest extends KernelTestCase
         $statuses = [];
         foreach ($paths as $path) {
             $request = Request::create($path, server: ['REMOTE_ADDR' => '203.0.113.7']);
-            $statuses[] = $kernel->handle($request, HttpKernelInterface::MAIN_REQUEST, true)->getStatusCode();
+            $response = $kernel->handle($request, HttpKernelInterface::MAIN_REQUEST, true);
+            $statuses[] = $response->getStatusCode();
+
+            if (429 === $response->getStatusCode()) {
+                $this->assertGreaterThan(0, (int) $response->headers->get('Retry-After'));
+            }
         }
 
         return [$statuses, $events];

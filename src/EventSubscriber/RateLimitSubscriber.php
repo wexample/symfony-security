@@ -7,8 +7,8 @@ use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ControllerArgumentsEvent;
-use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\RateLimiter\Storage\CacheStorage;
@@ -67,8 +67,14 @@ class RateLimitSubscriber implements EventSubscriberInterface
 
             if (! $consumption->isAccepted()) {
                 $this->dispatcher->dispatch($this->event($request, $id, $limit));
+                $retryAfter = max(1, $consumption->getRetryAfter()->getTimestamp() - time());
 
-                throw new TooManyRequestsHttpException(max(1, $consumption->getRetryAfter()->getTimestamp() - time()));
+                // Answered rather than thrown: an exception would be logged as
+                // an error on each refused request, a flood of them during a
+                // flood. The event above is what tells it.
+                $event->setController(static fn () => new Response(null, Response::HTTP_TOO_MANY_REQUESTS, ['Retry-After' => (string) $retryAfter]));
+
+                return;
             }
         }
     }
