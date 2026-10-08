@@ -1,6 +1,6 @@
 # symfony-security
 
-Version: 2.0.1
+Version: 2.1.0
 
 ## Masking a secret in every log
 
@@ -133,6 +133,7 @@ Visit the [Wexample Suite documentation](https://docs.wexample.com) for the comp
 - symfony/event-dispatcher: ^7.4 || ^8.0
 - symfony/http-foundation: ^7.4 || ^8.0
 - symfony/http-kernel: ^7.4 || ^8.0
+- symfony/rate-limiter: ^7.4 || ^8.0
 - symfony/yaml: ^7.4 || ^8.0
 
 ## Versioning & Compatibility Policy
