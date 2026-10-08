@@ -24,3 +24,7 @@ services:
 
   Wexample\SymfonySecurity\Tests\Fixtures\App\Log\:
     resource: '../Log/'
+
+  Wexample\SymfonySecurity\Tests\Fixtures\App\Controller\:
+    resource: '../Controller/'
+    tags: ['controller.service_arguments']

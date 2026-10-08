@@ -1,0 +1,3 @@
+fixtures:
+  resource: ../Controller/
+  type: attribute
