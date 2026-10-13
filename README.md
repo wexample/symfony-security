@@ -1,6 +1,6 @@
 # symfony-security
 
-Version: 2.1.0
+Version: 2.1.1
 
 ## Masking a secret in every log
 
