@@ -24,6 +24,14 @@ class RateLimitBundleTest extends KernelTestCase
      */
     private function hit(string ...$paths): array
     {
+        return $this->hitWith('GET', ...$paths);
+    }
+
+    /**
+     * @return array{0: list<int>, 1: list<RateLimitSecurityEvent>}
+     */
+    private function hitWith(string $method, string ...$paths): array
+    {
         $kernel = self::bootKernel();
         // The counts live in the application cache, a directory that outlives
         // the kernel; an array cache would not do, the kernel resets it
@@ -39,7 +47,7 @@ class RateLimitBundleTest extends KernelTestCase
 
         $statuses = [];
         foreach ($paths as $path) {
-            $request = Request::create($path, server: ['REMOTE_ADDR' => '203.0.113.7']);
+            $request = Request::create($path, $method, server: ['REMOTE_ADDR' => '203.0.113.7']);
             $response = $kernel->handle($request, HttpKernelInterface::MAIN_REQUEST, true);
             $statuses[] = $response->getStatusCode();
 
@@ -68,5 +76,23 @@ class RateLimitBundleTest extends KernelTestCase
 
         $this->assertSame([200, 200, 200, 429], $statuses);
         $this->assertSame('fixture_shared', $events[0]->extra['limit']);
+    }
+
+    public function testAConfiguredRuleCountsOnlyTheMethodsItNames(): void
+    {
+        [$reads] = $this->hitWith('GET', '/open', '/open', '/open');
+        [$writes, $events] = $this->hitWith('POST', '/open', '/open', '/open');
+
+        $this->assertSame([200, 200, 200], $reads);
+        $this->assertSame([200, 200, 429], $writes);
+        $this->assertSame('fixture_writes', $events[0]->extra['limit']);
+    }
+
+    public function testAConfiguredRuleMatchesByPath(): void
+    {
+        [$statuses, $events] = $this->hit('/open/mail', '/open/mail', '/open');
+
+        $this->assertSame([200, 429, 200], $statuses);
+        $this->assertSame('fixture_mail', $events[0]->extra['limit']);
     }
 }

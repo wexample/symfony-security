@@ -14,6 +14,8 @@ use Wexample\SymfonySecurity\Log\Masker\QueryParameterLogMasker;
 
 class WexampleSymfonySecurityExtension extends Extension
 {
+    public const string PARAMETER_RATE_LIMITS = 'wexample_symfony_security.rate_limits';
+
     public function load(
         array $configs,
         ContainerBuilder $container
@@ -35,6 +37,8 @@ class WexampleSymfonySecurityExtension extends Extension
                 );
             }
         }
+
+        $container->setParameter(self::PARAMETER_RATE_LIMITS, $config['rate_limits']);
 
         $container->setDefinition(
             SecurityHeadersSubscriber::class,
