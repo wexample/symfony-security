@@ -5,6 +5,7 @@ namespace Wexample\SymfonySecurity\EventSubscriber;
 use DateTimeImmutable;
 use Psr\Cache\CacheItemPoolInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,14 +15,13 @@ use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\RateLimiter\Storage\CacheStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Wexample\SymfonyHelpers\Attribute\WorkerSafe;
 use Wexample\SymfonySecurity\Attribute\RateLimit;
+use Wexample\SymfonySecurity\DependencyInjection\WexampleSymfonySecurityExtension;
 use Wexample\SymfonySecurity\Enum\RateLimitEventType;
 use Wexample\SymfonySecurity\Enum\RateLimitScope;
 use Wexample\SymfonySecurity\Event\RateLimitSecurityEvent;
 use Wexample\SymfonySecurity\Helper\RequestIdHelper;
-use Symfony\Component\DependencyInjection\Attribute\Autowire;
-use Wexample\SymfonyHelpers\Attribute\WorkerSafe;
-use Wexample\SymfonySecurity\DependencyInjection\WexampleSymfonySecurityExtension;
 
 /**
  * Applies the #[RateLimit] of the controller about to run, and the limits the
