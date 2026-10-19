@@ -18,6 +18,7 @@ use Wexample\SymfonySecurity\Enum\RateLimitEventType;
 use Wexample\SymfonySecurity\Enum\RateLimitScope;
 use Wexample\SymfonySecurity\Event\RateLimitSecurityEvent;
 use Wexample\SymfonySecurity\Helper\RequestIdHelper;
+use Wexample\SymfonyHelpers\Attribute\WorkerSafe;
 
 /**
  * Applies the #[RateLimit] of the controller about to run. The counts live
@@ -28,6 +29,7 @@ use Wexample\SymfonySecurity\Helper\RequestIdHelper;
 class RateLimitSubscriber implements EventSubscriberInterface
 {
     /** @var array<string, RateLimiterFactory> */
+    #[WorkerSafe('One factory per declared limit; the counts live in the cache, keyed by visitor.')]
     private array $factories = [];
 
     private readonly CacheStorage $storage;
