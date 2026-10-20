@@ -1,7 +1,7 @@
 {
   "name": "wexample/symfony-security",
   "description": "Security contracts shared by the Symfony packages: secret redaction in logs, security events, security headers",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "type": "library",
   "license": "MIT",
   "autoload": {
