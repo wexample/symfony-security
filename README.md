@@ -1,6 +1,6 @@
 # symfony-security
 
-Version: 4.0.0
+Version: 4.0.1
 
 ## Masking a secret in every log
 
@@ -155,7 +155,7 @@ The suite includes packages for configuration management, file handling, prompts
 - symfony/http-kernel: ^7.4 || ^8.0
 - symfony/rate-limiter: ^7.4 || ^8.0
 - symfony/yaml: ^7.4 || ^8.0
-- wexample/symfony-helpers: >=17.0.0
+- wexample/symfony-helpers: >=18.0.0
 
 ## Versioning & Compatibility Policy
 
