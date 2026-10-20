@@ -40,6 +40,10 @@ class WexampleSymfonySecurityExtension extends Extension
 
         $container->setParameter(self::PARAMETER_RATE_LIMITS, $config['rate_limits']);
 
+        foreach ($config['proof_of_work'] as $key => $value) {
+            $container->setParameter('wexample_symfony_security.proof_of_work.' . $key, $value);
+        }
+
         $container->setDefinition(
             SecurityHeadersSubscriber::class,
             (new Definition(SecurityHeadersSubscriber::class, [$this->buildHeaders($config['headers'])]))

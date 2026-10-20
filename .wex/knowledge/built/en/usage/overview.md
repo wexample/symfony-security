@@ -95,3 +95,24 @@ Referrer-Policy: strict-origin-when-cross-origin
 A header the response already carries is kept: a page that must be framed elsewhere sets its own `X-Frame-Options` on its response. `Content-Security-Policy` is off until the application writes one — a policy depends on its own scripts and styles. Each value is changed or left out in the configuration: see `readme/installation`.
 
 Before switching an existing host to HTTPS only, remember that a browser keeps `Strict-Transport-Security` for `max-age` seconds after reading it, subdomains included: shorten it, or drop `includeSubDomains`, while a subdomain still serves plain HTTP.
+
+## A captcha nobody solves by hand
+
+`ProofOfWorkService` makes the browser pay for a submission with work instead of a puzzle. `issue()` draws a challenge — the SHA-256 of a random salt and a number below `max_number` — and signs it with the kernel secret. The browser tries every number until the hash matches and sends back the challenge with the number. `verify()` checks, in one hash:
+
+- the signature, so a challenge made up by the client, easier, is refused;
+- its age: younger than `min_delay` (a form filled in by a program) or older than `lifetime` is refused;
+- the number;
+- that it was not used yet: a solved salt is kept in `cache.app` for the lifetime, so one solution sends one submission, on whichever worker.
+
+Nothing is stored when a challenge is issued, so a page drawn by one worker is checked by another. At the default `max_number` (100 000) the browser takes a few hundred milliseconds; a bot sending thousands of submissions pays thousands of times. Nothing reaches a third party.
+
+```yaml
+wexample_symfony_security:
+  proof_of_work:
+    max_number: 100000   # the work, half of it on average
+    lifetime: 3600       # seconds to fill the form in
+    min_delay: 3         # seconds below which a person cannot have filled it in
+```
+
+A form uses it through symfony-forms' `ProofOfWorkInputType`, which draws the challenge, solves it in the browser and checks it on submission.

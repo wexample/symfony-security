@@ -12,3 +12,12 @@ services:
     Wexample\SymfonySecurity\EventSubscriber\RateLimitSubscriber:
         arguments:
             $cache: '@cache.app'
+
+    Wexample\SymfonySecurity\Service\ProofOfWorkService:
+        arguments:
+            # Shared by every worker: a challenge solved on one is spent on all.
+            $cache: '@cache.app'
+            $secret: '%kernel.secret%'
+            $maxNumber: '%wexample_symfony_security.proof_of_work.max_number%'
+            $lifetime: '%wexample_symfony_security.proof_of_work.lifetime%'
+            $minDelay: '%wexample_symfony_security.proof_of_work.min_delay%'
