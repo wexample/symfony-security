@@ -1,7 +1,7 @@
 {
   "name": "wexample/symfony-security",
   "description": "Security contracts shared by the Symfony packages: secret redaction in logs, security events, security headers",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "type": "library",
   "license": "MIT",
   "autoload": {
@@ -31,7 +31,7 @@
     "symfony/http-kernel": "^7.4 || ^8.0",
     "symfony/rate-limiter": "^7.4 || ^8.0",
     "symfony/yaml": "^7.4 || ^8.0",
-    "wexample/symfony-helpers": ">=18.0.2"
+    "wexample/symfony-helpers": ">=19.0.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^13",
