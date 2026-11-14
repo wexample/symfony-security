@@ -95,4 +95,15 @@ class RateLimitBundleTest extends KernelTestCase
         $this->assertSame([200, 429, 200], $statuses);
         $this->assertSame('fixture_mail', $events[0]->extra['limit']);
     }
+
+    public function testAnErrorPageDoesNotSpendASecondToken(): void
+    {
+        // Two tokens for /open/boom: were the error page's sub-request counted
+        // too, the first failure would spend both and the second be refused.
+        [$statuses, $events] = $this->hit('/open/boom', '/open/boom', '/open/boom');
+
+        $this->assertSame([500, 500, 429], $statuses);
+        $this->assertCount(1, $events);
+        $this->assertSame('fixture_boom', $events[0]->extra['limit']);
+    }
 }

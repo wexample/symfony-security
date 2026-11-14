@@ -16,6 +16,7 @@ wexample_symfony_security:
   rate_limits:
     - { name: fixture_writes, methods: [post], limit: 2, interval: '1 minute' }
     - { name: fixture_mail, paths: '#^/open/mail$#', limit: 1, interval: '1 minute' }
+    - { name: fixture_boom, scope: user, paths: '#^/open/boom$#', limit: 2, interval: '1 minute' }
   headers:
     frame_options: DENY
     referrer_policy: ~

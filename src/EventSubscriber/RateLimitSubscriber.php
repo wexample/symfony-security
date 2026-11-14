@@ -85,8 +85,14 @@ class RateLimitSubscriber implements EventSubscriberInterface
         $request = $event->getRequest();
         $route = (string) $request->attributes->get('_route', '');
 
+        // The configured rules count what a visitor sends, so the main request
+        // only: an error page is rendered by a sub-request of the same path,
+        // which would otherwise spend a second token on one request sent.
+        // An attribute stays with the controller it limits, whatever reaches it.
+        $rules = $event->isMainRequest() ? $this->matchingRules($request, $route, RateLimitScope::USER) : [];
+
         /** @var RateLimit[] $limits */
-        $limits = [...$event->getAttributes(RateLimit::class), ...$this->matchingRules($request, $route, RateLimitScope::USER)];
+        $limits = [...$event->getAttributes(RateLimit::class), ...$rules];
 
         if ($refused = $this->consume($request, $route, $limits)) {
             // Answered rather than thrown: an exception would be logged as an
