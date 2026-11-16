@@ -1,6 +1,6 @@
 # symfony-security
 
-Version: 4.0.5
+Version: 5.0.0
 
 Security contracts shared by the Symfony packages: secret redaction in logs, security events, security headers
 
